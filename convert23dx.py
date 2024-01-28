@@ -49,7 +49,7 @@ def wait_until_open(window_name)->None:
 
     handle.activate()     
 
-def type_in_window(list_of_phrase:list,compound_keys:dict, simple_keys:list)->None:
+def type_in_window(list_of_phrase:list,compound_keys:dict, simple_keys:list, sleep_time:int)->None:
         """
         Type multiple phareses in window and hit enter after and/or press compund keys and release
         :param list_of_phrase: list type of pharese to type in window and hit enter after each one
@@ -62,7 +62,6 @@ def type_in_window(list_of_phrase:list,compound_keys:dict, simple_keys:list)->No
                 keyboard.type(list_item)
                 keyboard.press(Key.enter)
                 keyboard.release(Key.enter)
-                time.sleep(10)
         else:
             pass
 
@@ -78,7 +77,7 @@ def type_in_window(list_of_phrase:list,compound_keys:dict, simple_keys:list)->No
             for list_item in simple_keys:
                 keyboard.press(list_item)
                 keyboard.release(list_item)
-                time.sleep(1)
+                time.sleep(sleep_time)
 
 def create_screenshot(monitor_nr:int,word2fnd:str,arg2print:argparse,path_tesseract:str)->None:
     """
@@ -153,33 +152,35 @@ def close_process(process_name:str)->None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='This program help Bedo at his daily job')
+    parser = argparse.ArgumentParser(prog='This program help Bedo at his daily', description='Its usable only when the 1st monitor is openeing the Inventor !!!!.\nThe speed of the program can be tuned with tx variables that are the sleep times between different tasks',
+                                     epilog='Work smarter not harder',)
     parser.add_argument('-p', '--path', help='Path to the folder where the files are')
     parser.add_argument('-t', '--type', help='File type to look for in the folder')
     parser.add_argument('-pr','--program',help='Program .exe path')
+    parser.add_argument('-t1',default=15,help='Set the time sleep for openeing the Inventor, by default is 15s')
+    parser.add_argument('-t2',default=5,help='Ste the time sleep befor taking ht screenshots, by default it is 5s')
+    parser.add_argument('-t3',default=1,help='Ste the time between pressing the buttons from keyboard, by default it is 1s')
+    parser.add_argument('-t4',default=10,help='Set the time between open another file in inventor, by default it is 10s')
     parser.add_argument('--print_scrsht_text',help='print all the text from screenshot')
     parser.add_argument('--tesseract_path',default="C:\\Program Files\\Tesseract-OCR\\tesseract.exe",help='Path where tesseract is installed, by default is "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"')
     args = parser.parse_args()
     print(args)
     file_paths = find_files(args.path,args.type)
-    # file_paths = find_files("F:\\Bedo_program\\test_folder",'ipt')
     change_to3dmodel = [Key.alt,'e']
     save_dxf = [Key.tab,Key.down,Key.down,Key.down, Key.enter,Key.tab,Key.tab,Key.tab,Key.enter,Key.enter]
 
     for file in file_paths:
         open_file(str(file),args.program)
-        # open_file(str(file),"C:\Program Files\Autodesk\Inventor 2019\Bin\Inventor.exe")  
         wait_until_open('Autodesk') 
-        time.sleep(15)    
-        type_in_window([],[],change_to3dmodel)
-        time.sleep(5)
+        time.sleep(args.t1)    
+        type_in_window([],[],change_to3dmodel,args.t3)
+        time.sleep(args.t2)
         create_screenshot(1,"Pattern",args.print_scrsht_text,args.tesseract_path)
-        time.sleep(5)
+        time.sleep(args.t2)
         create_screenshot(1,"As...",args.print_scrsht_text,args.tesseract_path)
-        # type_in_window([],[],save_as)
-        type_in_window([],[],save_dxf)
+        type_in_window([],[],save_dxf,args.t3)
         close_process('Inventor.exe')
-        time.sleep(10)   
+        time.sleep(args.t4)   
 
 
 if __name__=="__main__":
