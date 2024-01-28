@@ -4,15 +4,13 @@ import argparse
 import subprocess
 import time
 from pynput.keyboard import Key, Controller
-import win32gui
 import pygetwindow as gw
 import pyautogui
 import pytesseract
 import mss
 import cv2
 import numpy as np
-
-
+import wmi
 
 def find_files(folder_path:str,file_type:str)->list:
     """
@@ -34,31 +32,7 @@ def find_files(folder_path:str,file_type:str)->list:
 
 
 def open_file(file_path:str,program_path:str)->None:
-    """
-    Open a file in a specific program
-    :file_path: full path of file
-    :program_path: full path of the exe fiel of the program
-    :return: None
-    """
     subprocess.Popen([program_path,file_path])
-
-def put_program_in_focus()->None:
-    hwnd = None
-    while hwnd is None:
-        hwnd = win32gui.FindWindow(None, "Acrobat")
-    win32gui.SetForegroundWindow(hwnd)
-
-
-def window_enum_handler(hwnd, resultList):
-    if win32gui.IsWindowVisible(hwnd) and win32gui.GetWindowText(hwnd) != '':
-        resultList.append((hwnd, win32gui.GetWindowText(hwnd)))
-
-def get_app_list(handles=[]):
-    mlst=[]
-    win32gui.EnumWindows(window_enum_handler, handles)
-    for handle in handles:
-        mlst.append(handle)
-    return mlst
 
 def wait_until_open(window_name)->None:
     """
@@ -106,14 +80,19 @@ def type_in_window(list_of_phrase:list,compound_keys:dict, simple_keys:list)->No
                 keyboard.release(list_item)
                 time.sleep(1)
 
-def create_screenshot(monitor_nr:int,word2fnd:str,arg2print:argparse)->float:
-     #Take a screenshot of the screen
+def create_screenshot(monitor_nr:int,word2fnd:str,arg2print:argparse,path_tesseract:str)->None:
+    """
+    Create screenshot from a specififc monitor and find a word on a screenshot and click on the word
+    :monitor_nr: nr of the monitor to take screenshot from
+    :word2fnd: find this word
+    :arg2print: for debug print all the word find on screenshot
+    :path_tesseract: the full path to tesseract
+    :return: None
+    """
     with mss.mss() as sct:
     
-    # Get information of monitor 2
         mon = sct.monitors[monitor_nr]
 
-        # The screen part to capture
         monitor = {
             "top": mon["top"],
             "left": mon["left"],
@@ -123,8 +102,7 @@ def create_screenshot(monitor_nr:int,word2fnd:str,arg2print:argparse)->float:
         }
         img = np.array(sct.grab(monitor)) # BGR Image
     
-    pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
-    # Perform OCR on the screenshot
+    pytesseract.pytesseract.tesseract_cmd = path_tesseract
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
     results = pytesseract.image_to_data(rgb, output_type=pytesseract.Output.DICT)
     if arg2print:
@@ -140,10 +118,36 @@ def create_screenshot(monitor_nr:int,word2fnd:str,arg2print:argparse)->float:
         sys.exit()
 
 def mouse_click(x:float,y:float,button:str)->None:
+    """
+    Click with the mouse
+    :x: x postition on the screen of the mouse
+    :y: y position on the screen of the mouse
+    :button: perform a right or a left click
+    :return: None
+    """
     if button =='right':
         pyautogui.rightClick(x,y)
     elif button== 'left':
         pyautogui.leftClick(x,y)
+    else:
+        pass
+
+def close_program(process_name:str)->None:
+    """
+    Close the program
+    :return: -
+    """
+    os.system("TASKKILL /F /IM {}".format(process_name))
+
+def close_process(process_name:str)->None:
+    """
+    Check if the process is alive and close else pass
+    :return:
+    """
+    f = wmi.WMI()
+    if [True for process in f.Win32_Process() if process.Name == process_name]:
+        close_program(process_name)
+        time.sleep(1)
     else:
         pass
 
@@ -154,26 +158,27 @@ def main():
     parser.add_argument('-t', '--type', help='File type to look for in the folder')
     parser.add_argument('-pr','--program',help='Program .exe path')
     parser.add_argument('--print_scrsht_text',help='print all the text from screenshot')
+    parser.add_argument('--tesseract_path',default="C:\\Program Files\\Tesseract-OCR\\tesseract.exe",help='Path where tesseract is installed, by default is "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"')
     args = parser.parse_args()
     print(args)
-    # file_paths = find_files(args.path,args.type)
-    file_paths = find_files("F:\\Bedo_program\\test_folder",'ipt')
+    file_paths = find_files(args.path,args.type)
+    # file_paths = find_files("F:\\Bedo_program\\test_folder",'ipt')
     change_to3dmodel = [Key.alt,'e']
-    save_as = [Key.down,Key.down,Key.down,Key.down,Key.down,Key.down,Key.down,Key.down,Key.down,Key.enter]
     save_dxf = [Key.tab,Key.down,Key.down,Key.down, Key.enter,Key.tab,Key.tab,Key.tab,Key.enter,Key.enter]
 
     for file in file_paths:
-        # open_file(str(file),args.program)
-        open_file(str(file),"C:\Program Files\Autodesk\Inventor 2019\Bin\Inventor.exe")  
+        open_file(str(file),args.program)
+        # open_file(str(file),"C:\Program Files\Autodesk\Inventor 2019\Bin\Inventor.exe")  
         wait_until_open('Autodesk') 
         time.sleep(15)    
         type_in_window([],[],change_to3dmodel)
         time.sleep(5)
-        create_screenshot(1,"Pattern",args.print_scrsht_text)
+        create_screenshot(1,"Pattern",args.print_scrsht_text,args.tesseract_path)
         time.sleep(5)
-        create_screenshot(1,"As...",args.print_scrsht_text)
+        create_screenshot(1,"As...",args.print_scrsht_text,args.tesseract_path)
         # type_in_window([],[],save_as)
         type_in_window([],[],save_dxf)
+        close_process('Inventor.exe')
         time.sleep(10)   
 
 
