@@ -152,7 +152,8 @@ def close_process(process_name:str)->None:
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='This program help Bedo at his daily', description='Its usable only when the 1st monitor is openeing the Inventor !!!!.\nThe speed of the program can be tuned with tx variables that are the sleep times between different tasks',
+    
+    parser = argparse.ArgumentParser(prog='This program help Bedo at his daily Job', description='Its usable only when the 1st monitor is openeing the Inventor !!!!.\nThe speed of the program can be tuned with tx variables that are the sleep times between different tasks',
                                      epilog='Work smarter not harder',)
     parser.add_argument('-p', '--path', help='Path to the folder where the files are')
     parser.add_argument('-t', '--type', help='File type to look for in the folder')
@@ -164,7 +165,6 @@ def main():
     parser.add_argument('--print_scrsht_text',help='print all the text from screenshot')
     parser.add_argument('--tesseract_path',default="C:\\Program Files\\Tesseract-OCR\\tesseract.exe",help='Path where tesseract is installed, by default is "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"')
     args = parser.parse_args()
-    print(args)
     file_paths = find_files(args.path,args.type)
     change_to3dmodel = [Key.alt,'e']
     save_dxf = [Key.tab,Key.down,Key.down,Key.down, Key.enter,Key.tab,Key.tab,Key.tab,Key.enter,Key.enter]
@@ -180,7 +180,7 @@ def main():
         create_screenshot(1,"As...",args.print_scrsht_text,args.tesseract_path)
         type_in_window([],[],save_dxf,args.t3)
         close_process('Inventor.exe')
-        time.sleep(args.t4)   
+        time.sleep(args.t4) 
 
 
 if __name__=="__main__":
