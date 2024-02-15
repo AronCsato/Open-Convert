@@ -32,13 +32,23 @@ def find_files(folder_path:str,file_type:str)->list:
 
 
 def open_file(file_path:str,program_path:str)->None:
-    subprocess.Popen([program_path,file_path])
+    """
+    Open files with specific program
+    :file_path: full path of the files
+    :progrem_path: fullpath of the .exe file of the program
+    :return: None
+    """
+    try:
+        subprocess.Popen([program_path,file_path])
+    except:
+        print("The program_path or the file_path is not corect")
+        sys.exit()
 
 def wait_until_open(window_name)->None:
     """
     Wait until window_name is appeard in opened windows
     :param window_name: the opened window name
-    :return: -
+    :return: None
     """
     while True:
         try:
@@ -54,7 +64,7 @@ def type_in_window(list_of_phrase:list,compound_keys:dict, simple_keys:list, sle
         Type multiple phareses in window and hit enter after and/or press compund keys and release
         :param list_of_phrase: list type of pharese to type in window and hit enter after each one
         :param compound_keys: press compound keys key-> hold pressed value hit and release
-        :return: -
+        :return: None
         """
         keyboard = Controller()
         if len(list_of_phrase):
@@ -134,14 +144,14 @@ def mouse_click(x:float,y:float,button:str)->None:
 def close_program(process_name:str)->None:
     """
     Close the program
-    :return: -
+    :return: None
     """
     os.system("TASKKILL /F /IM {}".format(process_name))
 
 def close_process(process_name:str)->None:
     """
     Check if the process is alive and close else pass
-    :return:
+    :return: None
     """
     f = wmi.WMI()
     if [True for process in f.Win32_Process() if process.Name == process_name]:
