@@ -1,0 +1,8 @@
+pynput
+pygetwindow
+pyautogui
+pytesseract
+mss
+cv2
+numpy
+wmi

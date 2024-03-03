@@ -12,11 +12,20 @@
 * After the Save As windows appears it navigates throught to save in .3dx format with keyboard commands
 * At each step closes the Inventor enad reopens it
 > **NOTE:** There are delays introduced in the program in form os sleep times, this time intervals can be tuned by ```tx``` arguments
-### The program can be run from cmd with ```convert23dx.exe```
-* The command to run it:`start convert23dx.exe`
-### For run the program you need to install tesseract on your local pc, you will find the neccesarry info:
+### The program can be run from cmd with ```python3 convert23dx.py``` and aditional arguments
+# Installing the program
+* ### For runing the program python version 3.xx needs to be intsalled
+`https://www.python.org/downloads/`
+> **NOTE:** Check add python to patrh in istalation process
+* ### Also need to install tesseract on your local pc, you will find the neccesarry info:
 `https://github.com/UB-Mannheim/tesseract/wiki`
-
+* ### Check if pip is available for python typing the next comand in CMD
+`pip --version`
+* ### If it is not available install pip folowing the instructions from the webpage below
+`https://phoenixnap.com/kb/install-pip-windows`
+* ### After pip is instaled install requirements with the next comand:
+`pip install -r requirements.txt`
+* ### Now you can run the program with the necessary arguments from cmd
 ### Arguments to run the program
 #### Necesarry arguments:
 * -p or --path: path to the folder where the files are
@@ -30,4 +39,4 @@
 * -t3: by default is 1s set the time between pressing the buttons from keyboard
 * -t4: by default is 10s set the time between open another file in inventor
 ### Example how to use:
-`python3 .\convert23dx.py -p F:\Bedo_program\test_folder -t ipt -pr "C:\\Program Files\\Autodesk\\Inventor 2019\\Bin\\Inventor.exe" `
+`python3 .\convert23dx.py -p F:\test_folder -t ipt -pr "C:\\Program Files\\Autodesk\\Inventor 2019\\Bin\\Inventor.exe" `
